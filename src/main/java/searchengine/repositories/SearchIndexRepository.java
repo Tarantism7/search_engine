@@ -14,4 +14,5 @@ import java.util.Optional;
 public interface SearchIndexRepository extends JpaRepository<SearchIndex, Integer> {
     List<SearchIndex> findByLemmaInAndPage_Site(List<Lemma> lemmas, Site site);
     Optional<SearchIndex> findByPageAndLemma(Page page, Lemma lemma);
+    List<SearchIndex> findByPage(Page page);
 }

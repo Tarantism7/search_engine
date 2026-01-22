@@ -2,56 +2,81 @@ package searchengine.services.statisctics;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import searchengine.config.SiteCfg;
 import searchengine.config.SitesCfgList;
 import searchengine.dto.statistics.DetailedStatisticsItem;
 import searchengine.dto.statistics.StatisticsData;
 import searchengine.dto.statistics.StatisticsResponse;
 import searchengine.dto.statistics.TotalStatistics;
+import searchengine.model.Site;
+import searchengine.repositories.LemmaRepository;
+import searchengine.repositories.PageRepository;
+import searchengine.repositories.SiteRepository;
 
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
 public class StatisticsServiceImpl implements StatisticsService {
 
-    private final Random random = new Random();
-    private final SitesCfgList sites;
+    private final SiteRepository siteRepository;
+    private final PageRepository pageRepository;
+    private final LemmaRepository lemmaRepository;
+    private final SitesCfgList sitesCfgList;
 
     @Override
     public StatisticsResponse getStatistics() {
-        String[] statuses = { "INDEXED", "FAILED", "INDEXING" };
-        String[] errors = {
-                "Ошибка индексации: главная страница сайта не доступна",
-                "Ошибка индексации: сайт не доступен",
-                ""
-        };
+        List<DetailedStatisticsItem> detailed = new ArrayList<>();
 
         TotalStatistics total = new TotalStatistics();
-        total.setSites(sites.getSiteCfgs().size());
-        total.setIndexing(true);
+        total.setSites(sitesCfgList.getSiteCfgs().size());
 
-        List<DetailedStatisticsItem> detailed = new ArrayList<>();
-        List<SiteCfg> sitesList = sites.getSiteCfgs();
-        for(int i = 0; i < sitesList.size(); i++) {
-            SiteCfg siteCfg = sitesList.get(i);
+        long totalPages = 0;
+        long totalLemmas = 0;
+        boolean anyIndexing = false;
+
+        for (var cfg : sitesCfgList.getSiteCfgs()) {
+            String url = cfg.getUrl();
+            Site site = siteRepository.findByUrl(url).orElse(null);
+
+            long pageCount = 0;
+            long lemmaCount = 0;
+            String status = "NOT_INDEXED";
+            String error = "";
+            long statusTimeMillis = 0L;
+
+            if (site != null) {
+                pageCount = pageRepository.countBySite(site);
+                lemmaCount = lemmaRepository.findBySite(site).stream().count();
+                status = site.getStatus() != null ? site.getStatus().name() : "NOT_INDEXED";
+                error = site.getLastError() != null ? site.getLastError() : "";
+                if (site.getStatusTime() != null) {
+                    statusTimeMillis = site.getStatusTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+                }
+                if ("INDEXING".equals(status)) {
+                    anyIndexing = true;
+                }
+            }
+
             DetailedStatisticsItem item = new DetailedStatisticsItem();
-            item.setName(siteCfg.getName());
-            item.setUrl(siteCfg.getUrl());
-            int pages = random.nextInt(1_000);
-            int lemmas = pages * random.nextInt(1_000);
-            item.setPages(pages);
-            item.setLemmas(lemmas);
-            item.setStatus(statuses[i % 3]);
-            item.setError(errors[i % 3]);
-            item.setStatusTime(System.currentTimeMillis() -
-                    (random.nextInt(10_000)));
-            total.setPages(total.getPages() + pages);
-            total.setLemmas(total.getLemmas() + lemmas);
+            item.setName(cfg.getName());
+            item.setUrl(url);
+            item.setPages((int) pageCount);
+            item.setLemmas((int) lemmaCount);
+            item.setStatus(status);
+            item.setError(error);
+            item.setStatusTime(statusTimeMillis);
+
+            totalPages += pageCount;
+            totalLemmas += lemmaCount;
+
             detailed.add(item);
         }
+
+        total.setPages((int) totalPages);
+        total.setLemmas((int) totalLemmas);
+        total.setIndexing(anyIndexing);
 
         StatisticsResponse response = new StatisticsResponse();
         StatisticsData data = new StatisticsData();
@@ -59,6 +84,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         data.setDetailed(detailed);
         response.setStatistics(data);
         response.setResult(true);
+
         return response;
     }
 }

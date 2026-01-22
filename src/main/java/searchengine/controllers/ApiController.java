@@ -42,7 +42,7 @@ public class ApiController {
         if (indexingService.stopIndexing()) {
             return ResponseEntity.ok(new IndexingResponse(true));
         } else {
-            return ResponseEntity.badRequest().body(new IndexingResponse(false, "Индексация уже запущена"));
+            return ResponseEntity.badRequest().body(new IndexingResponse(false, "Индексация не запущена"));
         }
     }
 
@@ -58,7 +58,7 @@ public class ApiController {
 
     @GetMapping("/search")
     public ResponseEntity<SearchResponse> search(@RequestParam String query,
-                                                 @RequestParam String site,
+                                                 @RequestParam(required = false) String site,
                                                  @RequestParam(defaultValue = "0") int offset,
                                                  @RequestParam(defaultValue = "20") int limit) {
         if (query == null || query.trim().isEmpty()) {
