@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name = "pages")
+@Table(name = "pages", indexes = {@Index(name = "path_index", columnList = "path")})
 public class Page {
 
     @Id

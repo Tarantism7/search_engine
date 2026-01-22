@@ -1,7 +1,7 @@
 # example values
 
 indexing-settings:
-  sites:
+  sites-cfgs:
     - url: https://www.lenta.ru
       name: Лента.ру
     - url: https://www.skillbox.ru
