@@ -12,6 +12,5 @@ import java.util.Optional;
 public interface LemmaRepository extends JpaRepository<Lemma, Integer> {
     List<Lemma> findByLemma(String lemma);
     Optional<Lemma> findByLemmaAndSite(String lemma, Site site);
-    List<Lemma> findBySiteAndFrequencyLessThanEqualOrderByFrequencyAsc(Site site, int maxFrequency);
     List<Lemma> findBySite(Site site);
 }

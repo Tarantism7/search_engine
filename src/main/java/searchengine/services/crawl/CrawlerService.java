@@ -94,7 +94,7 @@ public class CrawlerService {
                         .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
                         .header("Accept-Language", "en-US,en;q=0.5")
                         .header("Accept-Encoding", "gzip, deflate")
-                        .header("Connection", "keep-alive")
+//                        .header("Connection", "keep-alive")
                         .header("Upgrade-Insecure-Requests", "1")
                         .timeout(CrawlerCfg.TIMEOUT)
                         .followRedirects(true)
