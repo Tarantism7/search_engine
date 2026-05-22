@@ -71,5 +71,5 @@ java -jar target/searchengine-1.0.0.jar
 ```
 ## Authors
 
-- [@CocoJambo27](https://www.github.com/cocojambo27)
+- [@Tarantism](https://www.github.com/tarantism7)
 
