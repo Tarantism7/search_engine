@@ -53,7 +53,7 @@ All API requests use the `/api` prefix. Responses are returned in JSON format.
 * **Maven 3.8+**
 ### 1. **Clone the repository:**
 ```bash
-  git clone [https://github.com/Tarantism7/search_engine](https://github.com/Tarantism7/search_engine)
+  git clone https://github.com/Tarantism7/search_engine
   cd search-engine
 ```
 ### 2. **Database Configuration**
